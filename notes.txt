@@ -1,0 +1,47 @@
+1. Selected the required columns.
+
+2. Created dummy columns for column Type. [Converted categorical data to continuous variable] [One hot encoding]
+    Air temperature [K]        float64
+    Process temperature [K]    float64
+    Rotational speed [rpm]       int64
+    Torque [Nm]                float64
+    Tool wear [min]              int64
+    Machine failure              int64
+    type_H                       int64
+    type_L                       int64
+    type_M                       int64
+
+    Describe -
+               Air temperature [K]  Process temperature [K]  Rotational speed [rpm]   Torque [Nm]  Tool wear [min]  Machine failure        type_H        type_L        type_M
+    count         10000.000000             10000.000000            10000.000000  10000.000000     10000.000000     10000.000000  10000.000000  10000.000000  10000.000000
+    mean            300.004930               310.005560             1538.776100     39.986910       107.951000         0.033900      0.100300      0.600000      0.299700
+    std               2.000259                 1.483734              179.284096      9.968934        63.654147         0.180981      0.300415      0.489922      0.458149
+    min             295.300000               305.700000             1168.000000      3.800000         0.000000         0.000000      0.000000      0.000000      0.000000
+    25%             298.300000               308.800000             1423.000000     33.200000        53.000000         0.000000      0.000000      0.000000      0.000000
+    50%             300.100000               310.100000             1503.000000     40.100000       108.000000         0.000000      0.000000      1.000000      0.000000
+    75%             301.500000               311.100000             1612.000000     46.800000       162.000000         0.000000      0.000000      1.000000      1.000000
+    max             304.500000               313.800000             2886.000000     76.600000       253.000000         1.000000      1.000000      1.000000      1.000000
+
+3. Standardization on columns - ['Air temperature [K]', 'Process temperature [K]', 'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]']
+    Describe -
+               Air temperature [K]  Process temperature [K]  Rotational speed [rpm]   Torque [Nm]  Tool wear [min]  Machine failure        type_H        type_L        type_M
+    count         1.000000e+04             1.000000e+04            1.000000e+04  1.000000e+04     1.000000e+04     10000.000000  10000.000000  10000.000000  10000.000000
+    mean         -9.322321e-16            -1.693934e-15           -2.330580e-16  5.424994e-16     1.051603e-16         0.033900      0.100300      0.600000      0.299700
+    std           1.000050e+00             1.000050e+00            1.000050e+00  1.000050e+00     1.000050e+00         0.180981      0.300415      0.489922      0.458149
+    min          -2.352278e+00            -2.901986e+00           -2.068196e+00 -3.630149e+00    -1.695984e+00         0.000000      0.000000      0.000000      0.000000
+    25%          -8.523974e-01            -8.125581e-01           -6.458012e-01 -6.808401e-01    -8.633176e-01         0.000000      0.000000      0.000000      0.000000
+    50%           4.753123e-02             6.365340e-02           -1.995597e-01  1.134481e-02     7.698234e-04         0.000000      0.000000      1.000000      0.000000
+    75%           7.474757e-01             7.376623e-01            4.084443e-01  6.834663e-01     8.491466e-01         0.000000      0.000000      1.000000      1.000000
+    max           2.247357e+00             2.557486e+00            7.514840e+00  3.672902e+00     2.278819e+00         1.000000      1.000000      1.000000      1.000000
+
+4. Random Under sampling
+    Split the dataframe in X and Y. Applied random under sampling on majority.
+
+5. MLP -
+    solver is lbfgs because it works best for small datasets
+    max iter = 100 (Best MCC : 0.7952276237379277 using {'activation': 'relu', 'hidden_layer_sizes': (100,), 'learning_rate': 'adaptive'})
+    max iter = 1000 (Best MCC : 0.8063822587447659 using {'activation': 'relu', 'hidden_layer_sizes': (100,), 'learning_rate': 'invscaling'}) [Try to replicate this on colab]
+    Warning - Increase the number of iterations (max_iter) or scale the data as shown in:
+
+    mcc on test with best paras : 0.4051 (the model has mcc of .75 on training set)
+
