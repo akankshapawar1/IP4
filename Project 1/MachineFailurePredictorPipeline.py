@@ -278,21 +278,18 @@ def print_train_results(mlp_best_score, mlp_best_params, svm_best_score, svm_bes
 
 def print_train_results2(mlp_mcc, mlp_best_params, svm_mcc, svm_best_params, knn_mcc, knn_best_params, tree_mcc,
                          tree_best_params, soft_mcc, lr_best_params):
-    # Create a PrettyTable object
+
     table = PrettyTable()
 
-    # Define the column names
     table.field_names = ["ML Trained Model", "Best Set of Parameter Values",
                          "MCC-score on the 5-fold Cross Validation on Testing Data (20%)"]
 
-    # Add rows with the data
     table.add_row(["Multi-layer Neural Network", mlp_best_params, mlp_mcc])
     table.add_row(["Support Vector Machine", svm_best_params, svm_mcc])
     table.add_row(["K-Nearest Neighbors", knn_best_params, knn_mcc])
     table.add_row(["Decision Tree", tree_best_params, tree_mcc])
     table.add_row(["Softmax Regression", lr_best_params, soft_mcc])
 
-    # Print the table to the console
     print(table)
 
 
@@ -308,9 +305,7 @@ def main():
     step_5_output = step_5(step_4_output)
 
     # step 6 (train test split)
-    step_6_split(step_5_output)
-    train_path = 'train.csv'
-    test_path = 'test.csv'
+    train_path, test_path = step_6_split(step_5_output)
 
     # step 6 model training
     mlp_best_score, mlp_best_params = multi_layer_nn(train_path)
@@ -318,8 +313,8 @@ def main():
     knn_best_score, knn_best_params = k_nearest_neighbour(train_path)
     tree_best_score, tree_best_params = decision_tree(train_path)
     lr_best_score, lr_best_params = softmax_regression(train_path)
-    print_train_results(mlp_best_score, mlp_best_params, svm_best_score, svm_best_params, knn_best_score, knn_best_params,
-                        tree_best_score, tree_best_params, lr_best_score, lr_best_params)
+    print_train_results(mlp_best_score, mlp_best_params, svm_best_score, svm_best_params, knn_best_score,
+                        knn_best_params,tree_best_score, tree_best_params, lr_best_score, lr_best_params)
 
     # step 7 model testing
     mlp_mcc = mlp_model(test_path)
@@ -327,7 +322,8 @@ def main():
     knn_mcc = knn_model(test_path)
     tree_mcc = tree_model(test_path)
     soft_mcc = softmax_model(test_path)
-    print_train_results2(mlp_mcc, mlp_best_params, svm_mcc, svm_best_params, knn_mcc, knn_best_params, tree_mcc, tree_best_params, soft_mcc, lr_best_params)
+    print_train_results2(mlp_mcc, mlp_best_params, svm_mcc, svm_best_params, knn_mcc, knn_best_params,
+                         tree_mcc, tree_best_params, soft_mcc, lr_best_params)
 
 
 if __name__ == "__main__":
