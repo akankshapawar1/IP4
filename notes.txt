@@ -43,5 +43,31 @@
     max iter = 1000 (Best MCC : 0.8063822587447659 using {'activation': 'relu', 'hidden_layer_sizes': (100,), 'learning_rate': 'invscaling'}) [Try to replicate this on colab]
     Warning - Increase the number of iterations (max_iter) or scale the data as shown in:
 
-    mcc on test with best paras : 0.4051 (the model has mcc of .75 on training set)
+    Colab -
+    clf = MLPClassifier(solver='lbfgs', max_iter=1000)
+    parameter_space = {
+        'hidden_layer_sizes': [(100,)],
+        'activation': ['relu'],
+        'learning_rate': ['invscaling']
+    }
 
+    Best MCC : 0.8060143809363319 using {'activation': 'relu', 'hidden_layer_sizes': (100,), 'learning_rate': 'invscaling'}
+    mcc on test with best paras : 0.8128
+
+    Model saved outside this folder.
+
+6. SVM
+    Best MCC : 0.7903555816500395 using {'C': 1000, 'gamma': 0.01, 'kernel': 'rbf'}
+    mcc on test with best paras : 0.8080
+
+7. KNN
+    Best MCC : 0.7397595078168042 using {'algorithm': 'auto', 'n_neighbors': 3, 'p': 1}
+    mcc on test with best paras : 0.7146
+
+8. Decision tree
+    Best MCC : 0.8071282624480309 using {'ccp_alpha': 0.0, 'criterion': 'entropy', 'max_depth': 5}
+    mcc on test with best paras : 0.8208
+
+9. Softmax
+    Best MCC : 0.6324552683237885 using {'C': 1.0, 'penalty': 'l2', 'solver': 'liblinear'}
+    mcc on test with best paras : 0.6130

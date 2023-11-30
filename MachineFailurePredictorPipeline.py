@@ -1,13 +1,17 @@
 import joblib
 import pandas as pd
 from imblearn.under_sampling import RandomUnderSampler
-from sklearn import preprocessing
+from prettytable import PrettyTable
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import GridSearchCV
 from joblib import load
 from sklearn.metrics import matthews_corrcoef
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
 
 
 def step_3(path):
@@ -80,11 +84,7 @@ def multi_layer_nn(train_path):
         ['Air temperature [K]', 'Process temperature [K]', 'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]',
          'type_H', 'type_L', 'type_M']]
     y = df['Machine failure']
-    min_max_scaler = preprocessing.MinMaxScaler()
-    X_minmax = min_max_scaler.fit_transform(x)
     # https://datascience.stackexchange.com/a/36087/145654
-    # hidden_layer_sizes, activation, learning_rate 15 because number of features is 8. Geoff Hinton says number of
-    # neurons should be less than twice the input features (chatgpt)
     clf = MLPClassifier(solver='lbfgs', max_iter=1000)
     parameter_space = {
         'hidden_layer_sizes': [(100, 100), (50, 50,), (100,)],
@@ -92,27 +92,98 @@ def multi_layer_nn(train_path):
         'learning_rate': ['constant', 'invscaling', 'adaptive']
     }
     mlp = GridSearchCV(clf, param_grid=parameter_space, cv=5, scoring='matthews_corrcoef')
-    mlp.fit(X_minmax, y)
-    print(f"Best MCC : {mlp.best_score_} using {mlp.best_params_}")
+    mlp.fit(x, y)
 
     best_model = mlp.best_estimator_
     joblib.dump(best_model, 'multi_layer_nn.pkl')
 
+    return mlp.best_score_, mlp.best_params_
+
 
 def support_vector_machine(train_path):
-    pass
+    df = pd.read_csv(train_path)
+    x = df[
+        ['Air temperature [K]', 'Process temperature [K]', 'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]',
+         'type_H', 'type_L', 'type_M']]
+    y = df['Machine failure']
+    svc = SVC()
+    parameter_space = {
+        'C': [0.1, 1, 10, 100, 1000],
+        'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
+        'kernel': ['linear', 'poly', 'rbf', 'sigmoid']
+    }
+    svc_grid = GridSearchCV(svc, param_grid=parameter_space, cv=5, scoring='matthews_corrcoef')
+    svc_grid.fit(x, y)
+
+    best_model = svc_grid.best_estimator_
+    joblib.dump(best_model, 'svm.pkl')
+
+    return svc_grid.best_score_, svc_grid.best_params_
 
 
 def k_nearest_neighbour(train_path):
-    pass
+    # (n_neighbors, p, algorithm
+    df = pd.read_csv(train_path)
+    x = df[
+        ['Air temperature [K]', 'Process temperature [K]', 'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]',
+         'type_H', 'type_L', 'type_M']]
+    y = df['Machine failure']
+    knn = KNeighborsClassifier()
+    parameter_space = {
+        'n_neighbors': [3, 5, 8],
+        'p': [1, 2],
+        'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute']
+    }
+    knn_grid = GridSearchCV(knn, param_grid=parameter_space, cv=5, scoring='matthews_corrcoef')
+    knn_grid.fit(x, y)
+
+    best_model = knn_grid.best_estimator_
+    joblib.dump(best_model, 'knn.pkl')
+
+    return knn_grid.best_score_, knn_grid.best_params_
 
 
 def decision_tree(train_path):
-    pass
+    # criterion, max_depth, ccp_alpha
+    df = pd.read_csv(train_path)
+    x = df[
+        ['Air temperature [K]', 'Process temperature [K]', 'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]',
+         'type_H', 'type_L', 'type_M']]
+    y = df['Machine failure']
+    tree = DecisionTreeClassifier()
+    parameter_space = {
+        'criterion': ['gini', 'entropy', 'log_loss'],
+        'max_depth': [3, 5, 10],
+        'ccp_alpha': [0.0, 1.0, 2.0]
+    }
+    tree_grid = GridSearchCV(tree, param_grid=parameter_space, cv=5, scoring='matthews_corrcoef')
+    tree_grid.fit(x, y)
+
+    best_model = tree_grid.best_estimator_
+    joblib.dump(best_model, 'tree.pkl')
+
+    return tree_grid.best_score_, tree_grid.best_params_
 
 
 def softmax_regression(train_path):
-    pass
+    # penalty, C, solver
+    df = pd.read_csv(train_path)
+    x = df[
+        ['Air temperature [K]', 'Process temperature [K]', 'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]',
+         'type_H', 'type_L', 'type_M']]
+    y = df['Machine failure']
+    softmax = LogisticRegression()
+    parameter_space = [
+        {'solver': ['liblinear', 'saga'], 'penalty': ['l1', 'l2'], 'C': [1.0, 0.01, 0.001]},
+        {'solver': ['newton-cg', 'lbfgs', 'sag'], 'penalty': ['l2'], 'C': [1.0, 0.01, 0.001]}
+    ]
+    softmax_grid = GridSearchCV(softmax, param_grid=parameter_space, cv=5, scoring='matthews_corrcoef')
+    softmax_grid.fit(x, y)
+
+    best_model = softmax_grid.best_estimator_
+    joblib.dump(best_model, 'softmax.pkl')
+
+    return softmax_grid.best_score_, softmax_grid.best_params_
 
 
 def mlp_model(test_path):
@@ -123,32 +194,140 @@ def mlp_model(test_path):
     y = df['Machine failure']
     model_path = 'multi_layer_nn.pkl'
     loaded_model = load(model_path)
-    predictions = loaded_model.predict(x.values)
+    predictions = loaded_model.predict(x)
 
     mcc = matthews_corrcoef(y, predictions)
-    print(f'mcc on test with best paras : {mcc:.4f}')
+    return mcc
+
+
+def svm_model(test_path):
+    df = pd.read_csv(test_path)
+    x = df[
+        ['Air temperature [K]', 'Process temperature [K]', 'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]',
+         'type_H', 'type_L', 'type_M']]
+    y = df['Machine failure']
+    model_path = 'svm.pkl'
+    loaded_model = load(model_path)
+    predictions = loaded_model.predict(x)
+
+    mcc = matthews_corrcoef(y, predictions)
+    return mcc
+
+
+def knn_model(test_path):
+    df = pd.read_csv(test_path)
+    x = df[
+        ['Air temperature [K]', 'Process temperature [K]', 'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]',
+         'type_H', 'type_L', 'type_M']]
+    y = df['Machine failure']
+    model_path = 'knn.pkl'
+    loaded_model = load(model_path)
+    predictions = loaded_model.predict(x)
+
+    mcc = matthews_corrcoef(y, predictions)
+    return mcc
+
+
+def tree_model(test_path):
+    df = pd.read_csv(test_path)
+    x = df[
+        ['Air temperature [K]', 'Process temperature [K]', 'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]',
+         'type_H', 'type_L', 'type_M']]
+    y = df['Machine failure']
+    model_path = 'tree.pkl'
+    loaded_model = load(model_path)
+    predictions = loaded_model.predict(x)
+
+    mcc = matthews_corrcoef(y, predictions)
+    return mcc
+
+
+def softmax_model(test_path):
+    df = pd.read_csv(test_path)
+    x = df[
+        ['Air temperature [K]', 'Process temperature [K]', 'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]',
+         'type_H', 'type_L', 'type_M']]
+    y = df['Machine failure']
+    model_path = 'softmax.pkl'
+    loaded_model = load(model_path)
+    predictions = loaded_model.predict(x)
+
+    mcc = matthews_corrcoef(y, predictions)
+    return mcc
+
+
+def print_train_results(mlp_best_score, mlp_best_params, svm_best_score, svm_best_params, knn_best_score, knn_best_params,
+                        tree_best_score, tree_best_params, lr_best_score, lr_best_params):
+    # Create a PrettyTable object
+    table = PrettyTable()
+
+    # Define the column names
+    table.field_names = ["ML Trained Model", "Best Set of Parameter Values",
+                         "MCC-score on the 5-fold Cross Validation on Training Data (80%)"]
+
+    # Add rows with the data
+    table.add_row(["Multi-layer Neural Network", mlp_best_params, mlp_best_score])
+    table.add_row(["Support Vector Machine", svm_best_params, svm_best_score])
+    table.add_row(["K-Nearest Neighbors", knn_best_params, knn_best_score])
+    table.add_row(["Decision Tree", tree_best_params, tree_best_score])
+    table.add_row(["Softmax Regression", lr_best_params, lr_best_score])
+
+    # Print the table to the console
+    print(table)
+
+
+def print_train_results2(mlp_mcc, mlp_best_params, svm_mcc, svm_best_params, knn_mcc, knn_best_params, tree_mcc,
+                         tree_best_params, soft_mcc, lr_best_params):
+    # Create a PrettyTable object
+    table = PrettyTable()
+
+    # Define the column names
+    table.field_names = ["ML Trained Model", "Best Set of Parameter Values",
+                         "MCC-score on the 5-fold Cross Validation on Testing Data (20%)"]
+
+    # Add rows with the data
+    table.add_row(["Multi-layer Neural Network", mlp_best_params, mlp_mcc])
+    table.add_row(["Support Vector Machine", svm_best_params, svm_mcc])
+    table.add_row(["K-Nearest Neighbors", knn_best_params, knn_mcc])
+    table.add_row(["Decision Tree", tree_best_params, tree_mcc])
+    table.add_row(["Softmax Regression", lr_best_params, soft_mcc])
+
+    # Print the table to the console
+    print(table)
 
 
 def main():
-    """
     # step 3
     path = 'ai4i2020.csv'
     step_3_output = step_3(path)
+
     # step 4
     step_4_output = step_4(step_3_output)
+
     # step 5
     step_5_output = step_5(step_4_output)
+
     # step 6 (train test split)
-    step_6_train, step_6_test = step_6_split(step_5_output)
-    """
+    step_6_split(step_5_output)
     train_path = 'train.csv'
     test_path = 'test.csv'
-    # multi_layer_nn(train_path)
-    mlp_model(test_path)
-    support_vector_machine(train_path)
-    k_nearest_neighbour(train_path)
-    decision_tree(train_path)
-    softmax_regression(train_path)
+
+    # step 6 model training
+    mlp_best_score, mlp_best_params = multi_layer_nn(train_path)
+    svm_best_score, svm_best_params = support_vector_machine(train_path)
+    knn_best_score, knn_best_params = k_nearest_neighbour(train_path)
+    tree_best_score, tree_best_params = decision_tree(train_path)
+    lr_best_score, lr_best_params = softmax_regression(train_path)
+    print_train_results(mlp_best_score, mlp_best_params, svm_best_score, svm_best_params, knn_best_score, knn_best_params,
+                        tree_best_score, tree_best_params, lr_best_score, lr_best_params)
+
+    # step 7 model testing
+    mlp_mcc = mlp_model(test_path)
+    svm_mcc = svm_model(test_path)
+    knn_mcc = knn_model(test_path)
+    tree_mcc = tree_model(test_path)
+    soft_mcc = softmax_model(test_path)
+    print_train_results2(mlp_mcc, mlp_best_params, svm_mcc, svm_best_params, knn_mcc, knn_best_params, tree_mcc, tree_best_params, soft_mcc, lr_best_params)
 
 
 if __name__ == "__main__":
