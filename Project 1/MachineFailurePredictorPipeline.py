@@ -291,6 +291,18 @@ def print_train_results2(mlp_mcc, mlp_best_params, svm_mcc, svm_best_params, knn
     table.add_row(["Softmax Regression", lr_best_params, soft_mcc])
 
     print(table)
+    mcc_scores = {
+        "Multi-layer Neural Network": mlp_mcc,
+        "Support Vector Machine": svm_mcc,
+        "K-Nearest Neighbors": knn_mcc,
+        "Decision Tree": tree_mcc,
+        "Softmax Regression": soft_mcc
+    }
+
+    best_model = max(mcc_scores, key=mcc_scores.get)
+    best_mcc_score = mcc_scores[best_model]
+    print(f"The model with the highest MCC score is {best_model} with a score of {best_mcc_score}. "
+          f"This is the model that should be used in the future for machine failure prediction.")
 
 
 def main():
