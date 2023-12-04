@@ -114,7 +114,6 @@ def train_model(model, train_loader, device):
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     training_losses = []
 
-    # Train the model
     model.train()
     for images, labels in train_loader:
         images, labels = images.to(device), labels.to(device)
@@ -164,7 +163,7 @@ def cross_validate_with_dropout(train_dataset, dropout_rates, k=5):
             accuracies.append(accuracy)
 
         mean_accuracy = np.mean(accuracies)
-        print(f"Dropout: {dropout_rate}, Accuracy: {mean_accuracy}")
+        print(f"Dropout: {dropout_rate}, Accuracy: {mean_accuracy:.3f}")
 
         if mean_accuracy > best_accuracy:
             best_accuracy = mean_accuracy
@@ -181,13 +180,14 @@ def main():
 
     # step 4
     transform = transforms.Compose([
-        transforms.Resize((64, 64)),
-        transforms.ToTensor()
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
     train_dataset, test_dataset = prepare_datasets(melanoma_folder_path, naevus_folder_path, transform)
 
-    dropout_rates = [0.6, 0.75, 1.0]
+    dropout_rates = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.3, 0.1]
     best_dropout_rate, best_accuracy = cross_validate_with_dropout(train_dataset, dropout_rates)
     print(f"Best Dropout Rate: {best_dropout_rate}, Best Accuracy: {best_accuracy}")
 
@@ -196,11 +196,10 @@ def main():
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     best_model, training_losses = train_model(best_model, train_loader, device)
 
-    print("Training losses:", training_losses)
-
+    # step 5
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
     test_accuracy = model_test(best_model, test_loader, device)
-    print(f"Test Accuracy: {test_accuracy}")
+    print(f"Test Accuracy with best dropout rate of {best_dropout_rate} is: {test_accuracy}")
 
 
 if __name__ == "__main__":

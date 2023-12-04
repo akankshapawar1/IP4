@@ -1,0 +1,17 @@
+Dataset already balanced.
+Dropout: 0.6, Accuracy: 0.5399999999999999
+Dropout: 0.75, Accuracy: 0.45999999999999996
+Dropout: 1.0, Accuracy: 0.48
+Best Dropout Rate: 0.6, Best Accuracy: 0.5399999999999999
+Training losses: [0.6924706697463989, 2.3121252059936523, 0.7546205520629883, 0.7145496010780334]
+Test Accuracy: 0.5
+
+
+Dataset already balanced.
+Dropout: 0.5, Accuracy: 0.54
+Dropout: 0.3, Accuracy: 0.5599999999999999
+Dropout: 0.2, Accuracy: 0.5000000000000001
+Dropout: 0.1, Accuracy: 0.44000000000000006
+Best Dropout Rate: 0.3, Best Accuracy: 0.5599999999999999
+Training losses: [0.6934928297996521, 1.3178530931472778, 0.8407505750656128, 0.5993640422821045]
+Test Accuracy: 0.5
